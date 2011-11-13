@@ -2,9 +2,11 @@ import base64
 import re
 import struct
 from hashlib import md5, sha1
+from base64 import b64encode, b64decode
 
 from gevent.pywsgi import WSGIHandler
-from geventwebsocket import WebSocket, WebSocketVersion7
+from geventwebsocket import WebSocketVersion7, WebSocketLegacy
+
 
 
 class HandShakeError(ValueError):
@@ -13,9 +15,11 @@ class HandShakeError(ValueError):
 
 
 class WebSocketHandler(WSGIHandler):
-    GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
-
     """ Automatically upgrades the connection to websockets. """
+
+    GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+    SUPPORTED_VERSIONS = (7,8)
+
     def __init__(self, *args, **kwargs):
         self.websocket_connection = False
         self.allowed_paths = []
@@ -110,15 +114,20 @@ class WebSocketHandler(WSGIHandler):
     def _handle_one_legacy_response(self):
         # In case the client doesn't want to initialize a WebSocket connection
         # we will proceed with the default PyWSGI functionality.
-        if self.environ.get("HTTP_CONNECTION") != "Upgrade" or \
-           self.environ.get("HTTP_UPGRADE") != "WebSocket" or \
-           not self.environ.get("HTTP_ORIGIN") or \
-           not self.accept_upgrade():
-            return super(WebSocketHandler, self).handle_one_response()
-        else:
-            self.websocket_connection = True
+        print self.environ.get("HTTP_CONNECTION", "").lower().split(",")
 
-        self.websocket = WebSocket(self.socket, self.rfile, self.environ)
+        if "upgrade" in self.environ.get("HTTP_CONNECTION", "").lower(). \
+             replace(" ", "").split(",") and \
+             "websocket" in self.environ.get("HTTP_UPGRADE").lower() and \
+             self.upgrade_allowed():
+            self.websocket_connection = True
+        else:
+            print "NORMAL"
+            from pprint import pprint
+            pprint(self.environ)
+            return super(WebSocketHandler, self).handle_one_response()
+
+        self.init_websocket()
         self.environ['wsgi.websocket'] = self.websocket
 
         # Detect the Websocket protocol
@@ -168,7 +177,10 @@ class WebSocketHandler(WSGIHandler):
 
     def write(self, data):
         if self.websocket_connection:
-            self.socket.sendall(data)
+            if data:
+                self.socket.sendall(data)
+            else:
+                raise Exception("No data to send")
         else:
             super(WebSocketHandler, self).write(data)
 
@@ -199,7 +211,7 @@ class WebSocketHandler(WSGIHandler):
 
         return key_number / spaces
 
-    def _get_challenge(self):
+    def _get_challenge_hybi00(self):
         key1 = self.environ.get('HTTP_SEC_WEBSOCKET_KEY1')
         key2 = self.environ.get('HTTP_SEC_WEBSOCKET_KEY2')
 
@@ -223,6 +235,10 @@ class WebSocketHandler(WSGIHandler):
         challenge += key3
 
         return md5(challenge).digest()
+
+    def _get_challenge_hybi06(self):
+        key = self.environ.get("HTTP_SEC_WEBSOCKET_KEY")
+        return b64encode(sha1(key + MAGIC_STRING).digest())
 
     def wait(self):
         return self.websocket.wait()
