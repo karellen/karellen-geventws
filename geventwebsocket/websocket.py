@@ -45,10 +45,11 @@ if sys.version_info[:2] == (2, 7):
                 return -1
 
         def close(self):
-            if self.closed:
+            if self._sock is None:
                 return
-            RawIOBase.close(self)
+            self._sock.close()
             self._sock = None
+            RawIOBase.close(self)
 
     def makefile(socket):
         return BufferedReader(SocketIO(socket))
@@ -370,6 +371,9 @@ class WebSocketHybi(WebSocket):
 
     def send_frame(self, message, opcode):
         """Send a frame over the websocket with message as its payload"""
+        if self.socket is None:
+            raise WebSocketError('The connection was closed')
+
         header = chr(0x80 | opcode)
 
         if isinstance(message, unicode):
@@ -410,15 +414,16 @@ class WebSocketHybi(WebSocket):
         """Close the websocket, sending the specified code and message"""
         if self.socket is not None:
             message = self._encode_text(message)
-            self.send_frame(struct.pack('!H%ds' % len(message), code, message), opcode=self.OPCODE_CLOSE)
-            self._close()
+            try:
+                self.send_frame(struct.pack('!H%ds' % len(message), code, message), opcode=self.OPCODE_CLOSE)
+            finally:
+                self._close()
 
     def _close(self):
         if self.socket is not None:
-            self.socket._sock.close()
             self.socket = None
             self._write = None
-            fobj = self.fobj
-            self.fobj = None
             if not self._reading:
-                fobj.close()
+                self.fobj.close()
+            self.fobj = None
+
