@@ -1,9 +1,0 @@
-syntax: glob
-
-*.pyc
-*.sw?
-tests/testresults.sqlite3
-.vfenv
-docs/_build
-tests/reports/servers
-gevent_websocket.egg-info

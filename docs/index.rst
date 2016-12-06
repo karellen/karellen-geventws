@@ -1,8 +1,23 @@
-gevent-websocket
+.. karellen-geventws documentation master file, created by
+   sphinx-quickstart on Tue Dec  6 14:28:21 2016.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to karellen-geventws's documentation!
+=============================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+
+karellen-geventws
 ================
 
-gevent-websocket is a `WebSocket`_ library for the gevent_ networking library
-written written and maintained by `Jeffrey Gelens`_ It is licensed under the BSD license.
+karellen-geventws is a `WebSocket`_ library for the gevent_ networking library
+It is a fork of gevent-websocket originally written by `Jeffrey Gelens`_
+
+karellen-geventws It is licensed under the Apache 2.0 license.
 
 ::
 
@@ -86,9 +101,9 @@ Installation
 Distribute & Pip
 ----------------
 
-Installing gevent-websocket is simple with `pip <http://www.pip-installer.org>`_::
+Installing karellen-geventws is simple with `pip <http://www.pip-installer.org>`_::
 
-    $ pip install gevent-websocket
+    $ pip install karellen-geventws
 
 Get the Code
 ------------
@@ -97,42 +112,12 @@ Requests is being developed on BitBucket.
 
 You can clone the repsistory::
 
-    hg clone https://www.bitbucket.org/Jeffrey/gevent-websocket
-
-or download the tarball::
-
-    curl -LO https://bitbucket.org/Jeffrey/gevent-websocket/TODO
+    git clone https://github.com/karellen/karellen-geventws
 
 Once you have a copy, you can either embed it in your application, or installed
 it on your system with::
 
     $ python setup.py install
-
-
-API
-===
-
-.. module:: geventwebsocket
-
-Main classes
-------------
-
-.. autoclass:: geventwebsocket.server.WebSocketServer
-   :inherited-members:
-
-.. autoclass:: geventwebsocket.resource.WebSocketApplication
-   :inherited-members:
-
-.. autoclass:: geventwebsocket.resource.Resource
-   :inherited-members:
-
-Exceptions
-----------
-
-.. module:: geventwebsocket.exceptions
-
-.. autoexception:: WebSocketError
-
 
 Indices and tables
 ==================
@@ -144,8 +129,8 @@ Indices and tables
 .. _Autobahn Websocket Testsuite: http://autobahn.ws/testsuite
 .. _RFC6455: http://datatracker.ietf.org/doc/rfc6455/?include_text=1
 .. _WebSocket: http://www.websocket.org/aboutwebsocket.html
-.. _repository: http://www.bitbucket.org/Jeffrey/gevent-websocket/
-.. _PyPi: http://pypi.python.org/pypi/gevent-websocket/
-.. _gevent-websocket: http://www.bitbucket.org/Jeffrey/gevent-websocket/
+.. _repository: https://github.com/karellen/karellen-geventws
+.. _PyPi: http://pypi.python.org/pypi/karellen-geventws/
+.. _karellen-geventws: https://github.com/karellen/karellen-geventws
 .. _gevent: http://www.gevent.org
 .. _Jeffrey Gelens: http://www.noppo.pro
