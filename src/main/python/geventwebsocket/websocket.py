@@ -1,13 +1,10 @@
 import struct
-
 from socket import error
 
+from .exceptions import FrameTooLargeException
 from .exceptions import ProtocolError
 from .exceptions import WebSocketError
-from .exceptions import FrameTooLargeException
-
 from .utf8validator import Utf8Validator
-
 
 MSG_SOCKET_DEAD = "Socket is dead"
 MSG_ALREADY_CLOSED = "Connection is already closed"
@@ -62,7 +59,7 @@ class WebSocket(object):
         """
 
         if not bytestring:
-            return u''
+            return ''
 
         try:
             return bytestring.decode('utf-8')
@@ -76,11 +73,11 @@ class WebSocket(object):
         :returns: The utf-8 byte string equivalent of `text`.
         """
 
-        if isinstance(text, str):
+        if isinstance(text, bytes):
             return text
 
-        if not isinstance(text, unicode):
-            text = unicode(text or '')
+        if not isinstance(text, bytes):
+            text = str(text or '')
 
         return text.encode('utf-8')
 
@@ -238,7 +235,7 @@ class WebSocket(object):
         if an exception is called. Use `receive` instead.
         """
         opcode = None
-        message = ""
+        message = bytearray()
 
         while True:
             header, payload = self.read_frame()
@@ -286,9 +283,9 @@ class WebSocket(object):
 
         if opcode == self.OPCODE_TEXT:
             self.validate_utf8(message)
-            return message
+            return str(message, "utf-8")
         else:
-            return bytearray(message)
+            return message
 
     def receive(self):
         """
@@ -323,7 +320,7 @@ class WebSocket(object):
         if opcode == self.OPCODE_TEXT:
             message = self._encode_bytes(message)
         elif opcode == self.OPCODE_BINARY:
-            message = str(message)
+            message = bytes(message)
 
         header = Header.encode_header(True, opcode, '', len(message), 0)
 
@@ -337,7 +334,7 @@ class WebSocket(object):
         Send a frame over the websocket with message as its payload
         """
         if binary is None:
-            binary = not isinstance(message, (str, unicode))
+            binary = not isinstance(message, str)
 
         opcode = self.OPCODE_BINARY if binary else self.OPCODE_TEXT
 
@@ -363,7 +360,7 @@ class WebSocket(object):
             self.send_frame(
                 struct.pack('!H%ds' % len(message), code, message),
                 opcode=self.OPCODE_CLOSE)
-        except WebSocketError:
+        except WebSocketError as e:
             # Failed to write the closing frame but it's ok because we're
             # closing the socket anyway.
             self.logger.debug("Failed to write closing frame -> closing socket")
@@ -376,8 +373,6 @@ class WebSocket(object):
             self.raw_read = None
 
             self.environ = None
-
-            #self.current_app.on_close(MSG_ALREADY_CLOSED)
 
 
 class Stream(object):
@@ -410,7 +405,7 @@ class Header(object):
     HEADER_FLAG_MASK = RSV0_MASK | RSV1_MASK | RSV2_MASK
 
     def __init__(self, fin=0, opcode=0, flags=0, length=0):
-        self.mask = ''
+        self.mask = b''
         self.fin = fin
         self.opcode = opcode
         self.flags = flags
@@ -418,12 +413,12 @@ class Header(object):
 
     def mask_payload(self, payload):
         payload = bytearray(payload)
-        mask = bytearray(self.mask)
+        mask = self.mask
 
-        for i in xrange(self.length):
+        for i in range(self.length):
             payload[i] ^= mask[i % 4]
 
-        return str(payload)
+        return payload
 
     # it's the same operation
     unmask_payload = mask_payload
@@ -509,7 +504,9 @@ class Header(object):
         """
         first_byte = opcode
         second_byte = 0
-        extra = ''
+        extra = b''
+
+        result = bytearray()
 
         if fin:
             first_byte |= cls.FIN_MASK
@@ -538,6 +535,11 @@ class Header(object):
         if mask:
             second_byte |= cls.MASK_MASK
 
-            extra += mask
+        result.append(first_byte)
+        result.append(second_byte)
+        result.extend(extra)
 
-        return chr(first_byte) + chr(second_byte) + extra
+        if mask:
+            result.extend(mask)
+
+        return result
