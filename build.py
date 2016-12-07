@@ -42,6 +42,7 @@ def set_properties(project: Project):
 
     project.build_depends_on("wsaccel")
     project.build_depends_on("ujson")
+    project.build_depends_on("websocket-client", "~=0.0")
     # project.build_depends_on("autobahntestsuite", "~=0.7")
 
     # Cram Configuration

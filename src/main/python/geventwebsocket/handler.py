@@ -1,10 +1,10 @@
 import base64
 import hashlib
-import warnings
 
 from gevent.pywsgi import WSGIHandler
-from .websocket import WebSocket, Stream
+
 from .logging import create_logger
+from .websocket import WebSocket, Stream
 
 
 class Client(object):
@@ -49,7 +49,7 @@ class WebSocketHandler(WSGIHandler):
         try:
             self.server.clients[self.client_address] = Client(
                 self.client_address, self.websocket)
-            list(self.application(self.environ, lambda s, h, e=None: []))
+            list(self.application(self.environ, lambda s, h, e=None: []) or ())
         finally:
             del self.server.clients[self.client_address]
             if not self.websocket.closed:
@@ -60,8 +60,7 @@ class WebSocketHandler(WSGIHandler):
             self.websocket = None
 
     def run_application(self):
-        if (hasattr(self.server, 'pre_start_hook')
-                and self.server.pre_start_hook):
+        if hasattr(self.server, 'pre_start_hook') and self.server.pre_start_hook:
             self.logger.debug("Calling pre-start hook")
             if self.server.pre_start_hook(self):
                 return super(WebSocketHandler, self).run_application()
@@ -216,7 +215,7 @@ class WebSocketHandler(WSGIHandler):
             ("Upgrade", "websocket"),
             ("Connection", "Upgrade"),
             ("Sec-WebSocket-Accept", base64.b64encode(
-                hashlib.sha1(key + self.GUID).digest())),
+                hashlib.sha1((key + self.GUID).encode("latin-1")).digest()).decode("latin-1")),
         ]
 
         if protocol:
@@ -233,7 +232,11 @@ class WebSocketHandler(WSGIHandler):
         return self.server.logger
 
     def log_request(self):
-        if '101' not in self.status:
+        status = self.status
+        # On occasion if TLS connection is made and server is in HTTP mode
+        # status is going to be a string instead of a bytestring
+        if isinstance(status, bytes) and (b'101' not in status) or \
+                        isinstance(status, str) and ('101' not in status):
             self.logger.info(self.format_request())
 
     @property
