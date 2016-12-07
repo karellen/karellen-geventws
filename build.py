@@ -23,7 +23,7 @@ use_plugin("copy_resources")
 use_plugin("filter_resources")
 
 name = "karellen-geventws"
-version = "1.0.0"
+version = "1.0.1.dev"
 
 url = "https://github.com/karellen/karellen-geventws"
 description = "Please visit %s for more information!" % url
@@ -43,7 +43,6 @@ def set_properties(project: Project):
     project.build_depends_on("wsaccel")
     project.build_depends_on("ujson")
     project.build_depends_on("websocket-client", "~=0.0")
-    # project.build_depends_on("autobahntestsuite", "~=0.7")
 
     # Cram Configuration
     project.set_property("cram_fail_if_no_tests", False)
