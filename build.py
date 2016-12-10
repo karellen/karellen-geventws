@@ -23,7 +23,7 @@ use_plugin("copy_resources")
 use_plugin("filter_resources")
 
 name = "karellen-geventws"
-version = "1.0.1"
+version = "1.0.2.dev"
 
 url = "https://github.com/karellen/karellen-geventws"
 description = "Please visit %s for more information!" % url
