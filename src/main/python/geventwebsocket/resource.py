@@ -1,14 +1,9 @@
 import re
 import warnings
+from collections import OrderedDict
 
-from .protocols.base import BaseProtocol
 from .exceptions import WebSocketError
-
-try:
-    from collections import OrderedDict
-except ImportError:
-    class OrderedDict:
-        pass
+from .protocols.base import BaseProtocol
 
 
 class WebSocketApplication(object):
