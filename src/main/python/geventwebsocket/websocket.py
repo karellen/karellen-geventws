@@ -163,7 +163,7 @@ class WebSocket(object):
             raise ProtocolError('Invalid close frame: {0} {1}'.format(
                 header, payload))
 
-        code = struct.unpack('!H', str(payload[:2]))[0]
+        code = struct.unpack('!H', payload[:2])[0]
         payload = payload[2:]
 
         if payload:

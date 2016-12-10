@@ -22,11 +22,13 @@ patch_all()
 
 from gevent.pywsgi import WSGIServer
 from geventwebsocket.handler import WebSocketHandler
+from geventwebsocket import WebSocketApplication, Resource, WebSocketServer
 from socket import socket
 from logging import getLogger, shutdown
 from logging.config import dictConfig
 import sys
 
+from collections import OrderedDict
 from unittest import TestCase
 from websocket import create_connection
 from threading import Thread
@@ -69,27 +71,29 @@ class WSTests(TestCase):
         s_socket.listen(100)
         self.s_socket = s_socket
         self.err = []
+        self.server = None
 
     def tearDown(self):
-        self.server.stop(10)
+        if self.server:
+            self.server.stop(10)
         self.s_socket.close()
 
     def start_server(self):
         self.server.serve_forever()
 
-    def test_echo(self):
+    def test_low_level_echo(self):
         data = []
-        data.append("012345679")
-        data.append("012345679" * 20)
-        data.append("012345679" * 2000)
-        data.append("012345679" * 20000)
-        data.append("012345679" * 200000)
+        data.append("0123456789")
+        data.append("0123456789" * 20)
+        data.append("0123456789" * 2000)
+        data.append("0123456789" * 20000)
+        data.append("0123456789" * 200000)
 
-        data.append(b"012345679")
-        data.append(b"012345679" * 20)
-        data.append(b"012345679" * 2000)
-        data.append(b"012345679" * 20000)
-        data.append(b"012345679" * 200000)
+        data.append(b"0123456789")
+        data.append(b"0123456789" * 20)
+        data.append(b"0123456789" * 2000)
+        data.append(b"0123456789" * 20000)
+        data.append(b"0123456789" * 200000)
 
         def test_echo_actual(environ, start_response):
             try:
@@ -100,6 +104,8 @@ class WSTests(TestCase):
 
                 while True:
                     message = websocket.receive()
+                    if message is None:
+                        break
                     websocket.send(message)
                 websocket.close()
             except Exception as e:
@@ -115,7 +121,6 @@ class WSTests(TestCase):
 
             ws = create_connection("ws://%s:%s/" % (self.server.environ["SERVER_NAME"],
                                                     self.server.environ["SERVER_PORT"]))
-
 
             try:
                 for i in range(2):
@@ -134,6 +139,64 @@ class WSTests(TestCase):
                     self.assertEqual(pong[1].data, b'ping')
                     self.assertFalse(self.err)
             finally:
-                ws.close()
+                ws.close(timeout=10)
+        finally:
+            server.close()
+
+    def test_high_level_echo(self):
+        data = []
+        data.append("0123456789")
+        data.append("0123456789" * 20)
+        data.append("0123456789" * 2000)
+        data.append("0123456789" * 20000)
+        data.append("0123456789" * 200000)
+
+        data.append(b"0123456789")
+        data.append(b"0123456789" * 20)
+        data.append(b"0123456789" * 2000)
+        data.append(b"0123456789" * 20000)
+        data.append(b"0123456789" * 200000)
+
+        class EchoApplication(WebSocketApplication):
+            def on_open(self):
+                server.logger.info("Connection opened")
+
+            def on_message(self, message):
+                if message is None:
+                    return
+                server.logger.info("Message received %s", len(message))
+                self.ws.send(message)
+
+            def on_close(self, reason):
+                server.logger.info("Connection closed %s", reason)
+
+        server = WebSocketServer(self.s_socket, Resource(OrderedDict([('/', EchoApplication)])), debug=True)
+        server.start()
+        self.server = server
+        try:
+            self.server_thread = Thread(target=self.start_server)
+            self.server_thread.start()
+
+            ws = create_connection("ws://%s:%s/" % (self.server.environ["SERVER_NAME"],
+                                                    self.server.environ["SERVER_PORT"]))
+
+            try:
+                for i in range(2):
+                    if i == 1:
+                        ws.set_mask_key(lambda _: b'1234')
+                    for d in data:
+                        if isinstance(d, bytes):
+                            ws.send_binary(d)
+                        else:
+                            ws.send(d)
+                        self.assertEqual(ws.recv(), d)
+
+                    ws.ping("ping")
+                    pong = ws.recv_data_frame(10)
+                    self.assertEqual(pong[0], pong[1].OPCODE_PONG)
+                    self.assertEqual(pong[1].data, b'ping')
+                    self.assertFalse(self.err)
+            finally:
+                ws.close(timeout=10)
         finally:
             server.close()

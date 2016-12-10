@@ -22,20 +22,23 @@ Features include:
 
     class EchoApplication(WebSocketApplication):
         def on_open(self):
-            print "Connection opened"
+            print("Connection opened")
 
         def on_message(self, message):
             self.ws.send(message)
 
         def on_close(self, reason):
-            print reason
+            print(reason)
 
     WebSocketServer(
         ('', 8000),
         Resource({'/': EchoApplication})
     ).serve_forever()
+```
 
 or a low level implementation:
+
+```python
 
     from gevent import pywsgi
     from geventwebsocket.handler import WebSocketHandler
@@ -51,8 +54,8 @@ or a low level implementation:
     server.serve_forever()
 
 ```
-More examples can be found in the `examples` directory. Hopefully more
-documentation will be available soon.
+More examples can be found in the `src/unittest/python` directory.
+Hopefully more documentation will be available soon.
 
 Installation
 ============
@@ -78,8 +81,8 @@ Performance
 
 [karellen-geventws](https://github.com/karellen/karellen-geventws/) is
 pretty fast, but can be accelerated further by installing
-[wsaccel](https://github.com/methane/wsaccel) and ujson or
-\`simplejson\`:
+[wsaccel](https://github.com/methane/wsaccel) and `ujson` or
+`simplejson`:
 
     $ pip install wsaccel ujson
 
