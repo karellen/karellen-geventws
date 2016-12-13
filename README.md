@@ -87,7 +87,7 @@ pretty fast, but can be accelerated further by installing
     $ pip install wsaccel ujson
 
 [karellen-geventws](https://github.com/karellen/karellen-geventws/)
-automatically detects `wsaccell` and uses the Cython implementation for
+automatically detects `wsaccel` and uses the Cython implementation for
 UTF8 validation and later also frame masking and demasking.
 
 Get in touch
