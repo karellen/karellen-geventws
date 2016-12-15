@@ -2,8 +2,8 @@
 
 This is a [Karellen](https://www.karellen.co/karellen/) fork of
 [gevent-websocket](http://www.bitbucket.org/Jeffrey/gevent-websocket/).
-The goal of this fork is to maintain the project to support Python 3.5+
-and latest WS standards errata.
+The goal of this fork is to maintain the project to support Python 3.3, 3.4 and 3.5+
+as well as latest WS standards errata.
 
 [karellen-geventws](https://github.com/karellen/karellen-geventws/) is a
 WebSocket library for the [gevent](http://www.gevent.org/) networking

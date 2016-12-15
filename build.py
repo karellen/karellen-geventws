@@ -43,6 +43,7 @@ def set_properties(project: Project):
     project.build_depends_on("wsaccel")
     project.build_depends_on("ujson")
     project.build_depends_on("websocket-client", "~=0.0")
+    project.build_depends_on("gunicorn")
 
     # Cram Configuration
     project.set_property("cram_fail_if_no_tests", False)
@@ -68,6 +69,8 @@ def set_properties(project: Project):
 
     # Distutils
     project.set_property("distutils_classifiers", project.get_property("distutils_classifiers") + [
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Internet',
