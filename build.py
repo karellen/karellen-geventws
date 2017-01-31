@@ -34,6 +34,8 @@ license = "Apache License, Version 2.0"
 
 default_task = ["install_dependencies", "analyze", "sphinx_generate_documentation", "publish"]
 
+requires_python = ">=3.3,<3.7"
+
 
 @init
 def set_properties(project: Project):
@@ -71,9 +73,10 @@ def set_properties(project: Project):
     project.set_property("distutils_classifiers", project.get_property("distutils_classifiers") + [
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Internet',
-        ])
+    ])
 
     project.set_property("pdoc_module_name", "geventwebsocket")
