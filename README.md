@@ -1,5 +1,7 @@
 # Karellen Gevent Websocket Library
 
+[![Gitter chat](https://badges.gitter.im/karellen/gitter.svg)](https://gitter.im/karellen/lobby)
+
 This is a [Karellen](https://www.karellen.co/karellen/) fork of
 [gevent-websocket](http://www.bitbucket.org/Jeffrey/gevent-websocket/).
 The goal of this fork is to maintain the project to support Python 3.3, 3.4 and 3.5+
