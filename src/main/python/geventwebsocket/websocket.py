@@ -317,7 +317,7 @@ class WebSocket(object):
             self.current_app.on_close(MSG_ALREADY_CLOSED)
             raise WebSocketError(MSG_ALREADY_CLOSED)
 
-        if opcode == self.OPCODE_TEXT:
+        if opcode == self.OPCODE_TEXT or opcode == self.OPCODE_PING:
             message = self._encode_bytes(message)
         elif opcode == self.OPCODE_BINARY:
             message = bytes(message)
