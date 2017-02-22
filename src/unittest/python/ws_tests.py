@@ -22,6 +22,7 @@ patch_all()
 
 from gevent.pywsgi import WSGIServer
 from geventwebsocket.handler import WebSocketHandler
+from geventwebsocket.websocket import WebSocket
 from geventwebsocket import WebSocketApplication, Resource, WebSocketServer
 from socket import socket
 from logging import getLogger, shutdown
@@ -38,6 +39,19 @@ def http_handler(environ, start_response):
     start_response("400 Bad Request", [])
 
     return ["WebSocket connection is expected here."]
+
+
+class TestWebSocket(WebSocket):
+    def handle_ping(self, header, payload):
+        super().handle_ping(header, payload)
+        self.send_frame('', self.OPCODE_PING)
+        self.send_frame(b'', self.OPCODE_PING)
+        self.send_frame('ping', self.OPCODE_PING)
+        self.send_frame(b'ping', self.OPCODE_PING)
+
+
+class TestWebSocketHandler(WebSocketHandler):
+    WebSocket = TestWebSocket
 
 
 class WSTests(TestCase):
@@ -111,7 +125,7 @@ class WSTests(TestCase):
             except Exception as e:
                 self.err.append(e)
 
-        server = WSGIServer(self.s_socket, application=test_echo_actual, handler_class=WebSocketHandler)
+        server = WSGIServer(self.s_socket, application=test_echo_actual, handler_class=TestWebSocketHandler)
         server.logger = getLogger(__name__)
         server.start()
         self.server = server
@@ -137,6 +151,27 @@ class WSTests(TestCase):
                     pong = ws.recv_data_frame(10)
                     self.assertEqual(pong[0], pong[1].OPCODE_PONG)
                     self.assertEqual(pong[1].data, b'ping')
+
+                    ping = ws.recv_data_frame(9)
+                    self.assertEqual(ping[0], ping[1].OPCODE_PING)
+                    self.assertEqual(ping[1].data, b'')
+                    ws.pong(ping[1].data)
+
+                    ping = ws.recv_data_frame(9)
+                    self.assertEqual(ping[0], ping[1].OPCODE_PING)
+                    self.assertEqual(ping[1].data, b'')
+                    ws.pong(ping[1].data)
+
+                    ping = ws.recv_data_frame(9)
+                    self.assertEqual(ping[0], ping[1].OPCODE_PING)
+                    self.assertEqual(ping[1].data, b'ping')
+                    ws.pong(ping[1].data)
+
+                    ping = ws.recv_data_frame(9)
+                    self.assertEqual(ping[0], ping[1].OPCODE_PING)
+                    self.assertEqual(ping[1].data, b'ping')
+                    ws.pong(ping[1].data)
+
                     self.assertFalse(self.err)
             finally:
                 ws.close(timeout=10)

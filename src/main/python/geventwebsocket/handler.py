@@ -14,6 +14,7 @@ class Client(object):
 
 
 class WebSocketHandler(WSGIHandler):
+    WebSocket = WebSocket
     """
     Automatically upgrades the connection to a websocket.
 
@@ -205,7 +206,7 @@ class WebSocketHandler(WSGIHandler):
                 protocol = allowed_protocol
                 self.logger.debug("Protocol allowed: {0}".format(protocol))
 
-        self.websocket = WebSocket(self.environ, Stream(self), self)
+        self.websocket = self.WebSocket(self.environ, Stream(self), self)
         self.environ.update({
             'wsgi.websocket_version': version,
             'wsgi.websocket': self.websocket
