@@ -200,15 +200,15 @@ class WebSocket(object):
             raise ProtocolError
 
         if not header.length:
-            return header, ''
+            return header, b''
 
         try:
             payload = self.raw_read(header.length)
         except error:
-            payload = ''
+            payload = b''
         except Exception:
             # TODO log out this exception
-            payload = ''
+            payload = b''
 
         if len(payload) != header.length:
             raise WebSocketError('Unexpected EOF reading frame payload')
