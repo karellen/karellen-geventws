@@ -97,12 +97,14 @@ class WSTests(TestCase):
 
     def test_low_level_echo(self):
         data = []
+        data.append("")
         data.append("0123456789")
         data.append("0123456789" * 20)
         data.append("0123456789" * 2000)
         data.append("0123456789" * 20000)
         data.append("0123456789" * 200000)
 
+        data.append(b"")
         data.append(b"0123456789")
         data.append(b"0123456789" * 20)
         data.append(b"0123456789" * 2000)
@@ -180,12 +182,14 @@ class WSTests(TestCase):
 
     def test_high_level_echo(self):
         data = []
+        data.append("")
         data.append("0123456789")
         data.append("0123456789" * 20)
         data.append("0123456789" * 2000)
         data.append("0123456789" * 20000)
         data.append("0123456789" * 200000)
 
+        data.append(b"")
         data.append(b"0123456789")
         data.append(b"0123456789" * 20)
         data.append(b"0123456789" * 2000)
