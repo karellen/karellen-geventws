@@ -1,5 +1,9 @@
 # Karellen Gevent Websocket Library
 
+
+# This project is now suspended as the [Jeffrey Gelens](https://github.com/jgelens) resumed maintenance of [gevent-websocket](https://github.com/jgelens/gevent-websocket).
+
+
 [![Gitter chat](https://badges.gitter.im/karellen/gitter.svg)](https://gitter.im/karellen/lobby)
 
 This is a [Karellen](https://www.karellen.co/karellen/) fork of
